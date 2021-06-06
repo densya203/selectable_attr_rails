@@ -1,12 +1,9 @@
-$KCODE='u'
-
 FIXTURES_ROOT = File.join(File.dirname(__FILE__), 'fixtures') unless defined?(FIXTURES_ROOT)
 
 require 'rubygems'
 require 'active_support'
 require 'active_record'
 require 'active_record/fixtures'
-require 'active_record/test_case'
 require 'action_controller'
 require 'action_view'
 

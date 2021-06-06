@@ -2,7 +2,7 @@ if defined?(I18n)
   require 'selectable_attr'
 
   module SelectableAttr
-    class Enum
+    class AkmEnum
       def self.i18n_export(enums = nil)
         enums ||= instances
         result = {}

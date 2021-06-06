@@ -2,7 +2,7 @@ require 'selectable_attr_rails/validatable'
 
 module SelectableAttrRails
   module Validatable
-    module Enum
+    module AkmEnum
       def validates_format_options
         @validates_format_options
       end

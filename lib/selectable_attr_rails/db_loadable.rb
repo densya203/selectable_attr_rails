@@ -75,7 +75,7 @@ module SelectableAttrRails
             entry.name_from_db = r.last unless r.last.blank?
             new_entries << entry
           else
-            entry = SelectableAttr::Enum::Entry.new(self, r.first, "entry_#{r.first}".to_sym, r.last)
+            entry = SelectableAttr::AkmEnum::Entry.new(self, r.first, "entry_#{r.first}".to_sym, r.last)
             entry.extend(SelectableAttrRails::DbLoadable::Entry)
             entry.name_from_db = r.last
             new_entries << entry

@@ -19,9 +19,9 @@ module SelectableAttrRails
         include ::SelectableAttr::Base
         include ::SelectableAttrRails::Validatable::Base
       end
-      SelectableAttr::Enum.module_eval do
+      SelectableAttr::AkmEnum.module_eval do
         include ::SelectableAttrRails::DbLoadable
-        include ::SelectableAttrRails::Validatable::Enum
+        include ::SelectableAttrRails::Validatable::AkmEnum
       end
       logger.debug("#{self.name}.add_features_to_active_record")
     end
