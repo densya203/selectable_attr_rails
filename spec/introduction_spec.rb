@@ -1,6 +1,6 @@
 require File.expand_path('spec_helper', File.dirname(__FILE__))
 
-describe SelectableAttr do
+describe SelectableAttrRails do
 
   def assert_product_discount(klass)
     # productsテーブルのデータから安売り用の価格は
@@ -51,9 +51,6 @@ describe SelectableAttr do
     )
   end
 
-
-
-
   # できるだけ定数定義をまとめた場合
   # 結構すっきりするけど、同じことをいろんなモデルで書くかと思うと気が重い。
   class LegacyProduct2 < ActiveRecord::Base
@@ -88,11 +85,12 @@ describe SelectableAttr do
   # 定義は一カ所にまとめられて、任意の属性(ここでは:discount)も一緒に書くことができてすっきり〜
   class Product1 < ActiveRecord::Base
     self.table_name = 'products'
+    include ::SelectableAttr::Base
 
     selectable_attr :product_type_cd do
-      entry '01', :book, '書籍', :discount => 0.8
-      entry '02', :dvd, 'DVD', :discount => 0.2
-      entry '03', :cd, 'CD', :discount => 0.5
+      entry '01', :book , '書籍'  , :discount => 0.8
+      entry '02', :dvd  , 'DVD'   , :discount => 0.2
+      entry '03', :cd   , 'CD'    , :discount => 0.5
       entry '09', :other, 'その他', :discount => 1
       validates_format :allow_nil => true, :message => 'は次のいずれかでなければなりません。 #{entries}'
     end
@@ -109,7 +107,6 @@ describe SelectableAttr do
       [['書籍', '01'], ['DVD', '02'], ['CD', '03'], ['その他', '09']]
     )
   end
-
 
   # selectable_attrが定義するインスタンスメソッドの詳細
   it "test_product_type_instance_methods" do
@@ -292,9 +289,6 @@ describe SelectableAttr do
     assert_product_discount(ProductWithDB1)
   end
 
-
-
-
   # Q: product_type_cd の'_cd'はどこにいっちゃったの？
   # A: デフォルトでは、/(_cd$|_code$|_cds$|_codes$)/ を削除したものをbase_nameとして
   #    扱い、それに_keyなどを付加してメソッド名を定義します。もしこのルールを変更したい場合、
@@ -352,9 +346,6 @@ describe SelectableAttr do
     expect(Product2.type_names(:cd, :dvd)).to eq(['CD', 'DVD'])
   end
 
-
-
-
   # Q: selectable_attrの呼び出し毎にbase_bname(って言うの？)を指定したいんだけど。
   # A: base_nameオプションを指定してください。
   class Product3 < ActiveRecord::Base
@@ -408,6 +399,4 @@ describe SelectableAttr do
     expect(Product3.type_keys('02', '03')).to eq([:dvd, :cd])
     expect(Product3.type_names(:cd, :dvd)).to eq(['CD', 'DVD'])
   end
-
 end
-

@@ -40,3 +40,4 @@ if defined?(Rcov)
     end
   end
 end
+
