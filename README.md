@@ -12,9 +12,15 @@ https://github.com/densya203/selectable_attr
 
 ## 対応バージョン
 - Ruby 3.1 以上
-- Rails (activesupport / activerecord / actionpack / actionview) 7.1 以上
+- Rails (activesupport / activerecord / actionpack / actionview) 6.1 以上
 
-CI では Ruby 3.1〜3.4 × Rails 7.1〜8.1 の組み合わせでテストしています。
+CI では Ruby 3.1〜3.4 × Rails 6.1 / 7.1 / 7.2 / 8.0 / 8.1 の組み合わせで
+テストしています。
+
+Rails 6.1 を Ruby 3.3 以降で使う場合は、アプリ側の Gemfile に
+`concurrent-ruby 1.3.4` の固定と、bundled gem になった標準ライブラリ
+(`base64` / `bigdecimal` / `drb` / `logger` / `mutex_m` / `ostruct`) の
+追加が必要です。
 
 
 ## Install

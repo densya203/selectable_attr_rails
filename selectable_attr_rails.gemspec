@@ -22,10 +22,10 @@ Gem::Specification.new do |s|
       %w[MIT-LICENSE README.md Rakefile init.rb selectable_attr_rails.gemspec]
   end
 
-  s.add_runtime_dependency "activesupport", ">= 7.1"
-  s.add_runtime_dependency "activerecord",  ">= 7.1"
-  s.add_runtime_dependency "actionpack",    ">= 7.1"
-  s.add_runtime_dependency "actionview",    ">= 7.1"
+  s.add_runtime_dependency "activesupport", ">= 6.1"
+  s.add_runtime_dependency "activerecord",  ">= 6.1"
+  s.add_runtime_dependency "actionpack",    ">= 6.1"
+  s.add_runtime_dependency "actionview",    ">= 6.1"
   s.add_runtime_dependency "selectable_attr", ">= 0.3.22"
 
   s.add_development_dependency "rake"
