@@ -1,15 +1,21 @@
 module SelectableAttrRails
   module DbLoadable
+    # :when には :first_time (既定) / :everytime / :never を指定します。
+    #   :first_time … 最初にエントリを参照したときだけ DB から読み込みます
+    #   :everytime  … エントリを参照する度に DB から読み込みます
+    #   :never      … DB からは読み込みません
     def update_by(*args, &block)
       options = args.last.is_a?(Hash) ? args.pop : {}
       options = {:when => :first_time}.update(options)
       @sql_to_update = block_given? ? block : args.first
       @update_timing = options[:when]
+      @entries_updated = false
       self.extend(InstanceMethods) unless respond_to?(:update_entries)
     end
 
+    # DB から取得した名称を entry#name より優先させるためのモジュールです。
+    # entry の特異クラスに prepend するので、何度適用しても安全です。
     module Entry
-
       if defined?(I18n)
         def name_from_db
           @names_from_db ||= {}
@@ -20,27 +26,18 @@ module SelectableAttrRails
           @names_from_db ||= {}
           @names_from_db[I18n.locale.to_s] = value
         end
-
-        def name_with_from_db
-          name_from_db || name_without_from_db
-        end
-
       else
-
         attr_accessor :name_from_db
-        def name_with_from_db
-          @name_from_db || name_without_from_db
-        end
-
       end
 
-      def self.extended(obj)
-        obj.instance_eval do
-          alias :name_without_from_db :name
-          alias :name :name_with_from_db
-        end
+      def name
+        name_from_db || super
       end
 
+      def self.apply_to(entry)
+        entry.singleton_class.prepend(self)
+        entry
+      end
     end
 
     module InstanceMethods
@@ -50,24 +47,28 @@ module SelectableAttrRails
       end
 
       def must_be_updated?
-        return false if @update_timing == :never
-        return true if @update_timing == :everytime
+        case @update_timing
+        when :never then false
+        when :everytime then true
+        else !@entries_updated # :first_time
+        end
       end
 
       def update_entries
         unless @original_entries
           @original_entries = @entries.dup
-          @original_entries.each do |entry|
-            entry.extend(SelectableAttrRails::DbLoadable::Entry) unless respond_to?(:name_from_db)
+          @original_entries.each{|entry| Entry.apply_to(entry)}
+        end
+
+        records =
+          if @sql_to_update.respond_to?(:call)
+            @sql_to_update.call
+          else
+            sql = @sql_to_update.gsub(/\:locale/, I18n.locale.to_s.inspect)
+            ActiveRecord::Base.connection_pool.with_connection do |connection|
+              connection.select_rows(sql)
+            end
           end
-        end
-        records = nil
-        if @sql_to_update.respond_to?(:call)
-          records = @sql_to_update.call
-        else
-          sql = @sql_to_update.gsub(/\:locale/, I18n.locale.to_s.inspect)
-          records = ActiveRecord::Base.connection.select_rows(sql)
-        end
 
         new_entries = []
         records.each do |r|
@@ -76,7 +77,7 @@ module SelectableAttrRails
             new_entries << entry
           else
             entry = SelectableAttr::AkmEnum::Entry.new(self, r.first, "entry_#{r.first}".to_sym, r.last)
-            entry.extend(SelectableAttrRails::DbLoadable::Entry)
+            Entry.apply_to(entry)
             entry.name_from_db = r.last
             new_entries << entry
           end
@@ -87,6 +88,7 @@ module SelectableAttrRails
             new_entries << entry if entry.defined_in_code
           end
         end
+        @entries_updated = true
         @entries = new_entries
       end
     end

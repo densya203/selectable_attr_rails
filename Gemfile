@@ -1,23 +1,27 @@
-source "http://rubygems.org"
-# Add dependencies required to use your gem here.
-# Example:
-#   gem "activesupport", ">= 2.3.5"
+source "https://rubygems.org"
 
-gem "activesupport", ">= 6.1"
-gem "activerecord", ">= 6.1"
-gem "actionpack", ">= 6.1"
-gem "selectable_attr", ">= 0.3.20", :github => 'densya203/selectable_attr'
+# CI から RAILS_VERSION で対象バージョンを切り替えます (例: "~> 7.2.0")
+rails_version = ENV['RAILS_VERSION'] || '>= 7.1'
 
-# Add dependencies to develop your gem here.
-# Include everything needed to run rake, tests, features, etc.
-group :development do
+gem "activesupport", rails_version
+gem "activerecord",  rails_version
+gem "actionpack",    rails_version
+gem "actionview",    rails_version
+# 本体を並行して開発する場合は SELECTABLE_ATTR_PATH にそのパスを指定します
+#   SELECTABLE_ATTR_PATH=../selectable_attr bundle install
+if (selectable_attr_path = ENV['SELECTABLE_ATTR_PATH'])
+  gem "selectable_attr", :path => selectable_attr_path
+else
+  gem "selectable_attr", ">= 0.3.22", :github => 'densya203/selectable_attr'
+end
+
+group :development, :test do
   gem 'bundler'
   gem 'rake'
-  gem "sqlite3"
-  gem "rspec"
+  gem "sqlite3", ">= 2.0"
+  gem "rspec", "~> 3.13"
   gem "yard"
-  gem "simplecov", "~> 0.6.4"
-  gem "autotest"
+  gem "simplecov"
 
   gem 'rdiscount'
 end

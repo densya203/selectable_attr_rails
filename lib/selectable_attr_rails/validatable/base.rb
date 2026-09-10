@@ -4,30 +4,29 @@ module SelectableAttrRails
   module Validatable
     module Base
       def self.included(mod)
-        mod.extend(ClassMethods)
-        mod.instance_eval do
-          alias :define_enum_without_validatable :define_enum
-          alias :define_enum :define_enum_with_validatable
-        end
+        # SelectableAttr::Base::ClassMethods#define_enum を包みます (prepend は冪等)
+        mod.singleton_class.prepend(ClassMethods)
       end
 
       module ClassMethods
-        def define_enum_with_validatable(context)
+        def define_enum(context)
+          super
           enum = context[:enum]
-          if options = enum.validates_format_options
-            options[:with] = Regexp.union(*enum.entries.map{|entry| /#{Regexp.escape(entry.id)}/})
-            entry_format = options.delete(:entry_format) || '#{entry.name}'
-            entries = enum.entries.map{|entry| instance_eval("\"#{entry_format}\"")}.join(', ')
-            message = options.delete(:message) || 'is invalid, must be one of #{entries}'
-            options[:message] = instance_eval("\"#{message}\"")
-            validates_format_of(context[:attr], options)
-          end
+          return unless enum.respond_to?(:validates_format_options)
+          return unless (options = enum.validates_format_options)
+
+          # enum が保持しているハッシュを壊さないように複製してから使います
+          options = options.dup
+          # 前方後方をアンカーで固定しないと "X01Y" のような値も通ってしまいます
+          options[:with] = Regexp.union(
+            *enum.entries.map{|entry| /\A#{Regexp.escape(entry.id.to_s)}\z/})
+          entry_format = options.delete(:entry_format) || '#{entry.name}'
+          entries = enum.entries.map{|entry| instance_eval("\"#{entry_format}\"")}.join(', ')
+          message = options.delete(:message) || 'is invalid, must be one of #{entries}'
+          options[:message] = instance_eval("\"#{message}\"")
+          validates_format_of(context[:attr], options)
         end
       end
-
-
     end
   end
 end
-
-

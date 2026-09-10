@@ -3,6 +3,8 @@ module SelectableAttrRails::Helpers
   module CheckBoxGroupHelper
     class Builder < SelectableAttrRails::Helpers::AbstractSelectionBuilder
 
+      attr_accessor :check_box_id
+
       def initialize(object, object_name, method, options, template)
         super(object, object_name, method, options, template)
         @entry_hash_array ||= enum_hash_array_from_object
@@ -12,7 +14,7 @@ module SelectableAttrRails::Helpers
 
       def each(&block)
         @entry_hash_array.each do |entry_hash|
-          @entry_hash= entry_hash
+          @entry_hash = entry_hash
           @tag_value = @entry_hash[:id].to_s.gsub(/\s/, "_").gsub(/\W/, "")
           @check_box_id = "#{@object_name}_#{@param_name}_#{@tag_value}"
           yield(self)
@@ -41,16 +43,15 @@ module SelectableAttrRails::Helpers
         if block_given?
           yield(builder)
           return nil
-        else
-          result = ''
-          builder.each do
-            result << builder.check_box
-            result << '&nbsp;'
-            result << builder.label
-            result << '&nbsp;'
-          end
-          return result.respond_to?(:html_safe) ? result.html_safe : result
         end
+        result = ActiveSupport::SafeBuffer.new
+        builder.each do
+          result << builder.check_box
+          result << '&nbsp;'.html_safe
+          result << builder.label
+          result << '&nbsp;'.html_safe
+        end
+        result
       end
     end
 

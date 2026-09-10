@@ -1,9 +1,8 @@
+require 'selectable_attr_rails/helpers/abstract_selection_helper'
 module SelectableAttrRails::Helpers
   module RadioButtonGroupHelper
     class Builder < SelectableAttrRails::Helpers::AbstractSelectionBuilder
 
-      attr_reader :entry_hash_array
-      attr_reader :entry_hash
       attr_accessor :radio_button_id
 
       def initialize(object, object_name, method, options, template)
@@ -38,14 +37,13 @@ module SelectableAttrRails::Helpers
         if block_given?
           yield(builder)
           return nil
-        else
-          result = ''
-          builder.each do
-            result << builder.radio_button
-            result << builder.label
-          end
-          return result.respond_to?(:html_safe) ? result.html_safe : result
         end
+        result = ActiveSupport::SafeBuffer.new
+        builder.each do
+          result << builder.radio_button
+          result << builder.label
+        end
+        result
       end
     end
 

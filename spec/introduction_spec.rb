@@ -191,11 +191,7 @@ describe SelectableAttrRails do
     p1.product_type_cd = 'XX'
     expect(p1.product_type_cd).to eq('XX')
     expect(p1.valid?).to eq(false)
-    if ActiveRecord::VERSION::MAJOR <= 2
-      expect(p1.errors.on(:product_type_cd)).to eq("は次のいずれかでなければなりません。 書籍, DVD, CD, その他")
-    else
-      expect(p1.errors[:product_type_cd]).to eq(["は次のいずれかでなければなりません。 書籍, DVD, CD, その他"])
-    end
+    expect(p1.errors[:product_type_cd]).to eq(["は次のいずれかでなければなりません。 書籍, DVD, CD, その他"])
   end
 
   # selectable_attrのエントリ名をDB上に保持するためのモデル
